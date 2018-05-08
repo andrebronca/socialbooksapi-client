@@ -1,26 +1,44 @@
 package com.andre.socialbooks.aplicacao;
 
-import java.net.URI;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
-import org.springframework.http.RequestEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-
+import com.andre.socialbooks.client.LivrosClient;
 import com.andre.socialbooks.client.domain.Livro;
 
 public class Aplicacao {
 	
 	public static void main(String[] args) {
+		salvarLivro();
+		listarLivros();
 		
-		RestTemplate restTemplate = new RestTemplate();
 		
-		RequestEntity<Void> request = RequestEntity
-				.get(URI.create("http://localhost:8080/livros"))
-				.header("Authorization", "Basic YWRtcm9vdDpzM25oNA==").build();
 		
-		ResponseEntity<Livro[]> response = restTemplate.exchange(request, Livro[].class);
+	}
+	
+	private static void salvarLivro() {
+		LivrosClient livroCliente = new LivrosClient();
+		Livro livro = new Livro();
+		livro.setNome("Easy code simplicity");
+		livro.setEditora("kbook");
+		SimpleDateFormat publicacao = new SimpleDateFormat("dd/MM/yyyy");
+		try {
+			livro.setPublicacao(publicacao.parse("01/01/2018"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		livro.setResumo("Aborda boas práticas de codificação");
 		
-		for (Livro livro : response.getBody()) {
+		String localizacao = livroCliente.salvar(livro);
+		System.out.println("URI do livro salvo: "+ localizacao);
+	}
+	
+	private static void listarLivros() {
+		LivrosClient livrosClient = new LivrosClient();
+		List<Livro> listaLivros = livrosClient.listar();
+		
+		for (Livro livro : listaLivros) {
 			System.out.println("Livro: "+ livro.getNome());
 		}
 	}
